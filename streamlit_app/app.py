@@ -3,7 +3,6 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import streamlit as st
-from parser.html_table import fetch_table_data as fetch_html
 from parser.pdf_table import fetch_pdf_data as fetch_pdf
 from regression.polynomial import fit_polynomial, evaluate_polynomial, plot_polynomial
 import numpy as np
@@ -14,7 +13,9 @@ st.set_page_config(page_title="Thermal Bridge Regression Tool", layout="centered
 st.title("📊 Thermal Envelope Detail Regression Tool")
 
 # --- Input Section ---
-source = st.radio("Select data source:", ["HTML Table", "PDF Thermal Sheet"])
+st.markdown("**Select data source:**")
+st.radio("Only PDF mode is supported on Streamlit Cloud:", ["PDF Thermal Sheet"], index=0, disabled=True)
+
 detail_number = st.text_input("Enter detail number (e.g. 7.1.29):", value="7.1.29")
 spacing = st.text_input("Vertical spacing (inches):", value="24")
 degree = st.slider("Polynomial degree:", 1, 4, 2)
@@ -23,10 +24,7 @@ x_query = st.number_input("R-value to predict:", value=10.0)
 # --- Run Button ---
 if st.button("Run Regression"):
     with st.spinner("Fetching data..."):
-        if source == "HTML Table":
-            x_vals, y_vals = fetch_html(detail_number, spacing)
-        else:
-            x_vals, y_vals = fetch_pdf(detail_number, spacing)
+        x_vals, y_vals = fetch_pdf(detail_number, spacing)
 
     if not x_vals:
         st.error("❌ No data found. Check detail number or spacing.")
